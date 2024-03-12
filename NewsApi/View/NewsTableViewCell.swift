@@ -73,20 +73,53 @@ class NewsTableViewCell: UITableViewCell {
     }
     
     func configure(with viewModel: NewsTableViewCellViewModel) {
-        newsTitleLabel.text = viewModel.title
-        subtitleLabel.text = viewModel.subtitle
-        
-        if let data = viewModel.imageData {
-            newsImageView.image = UIImage(data: data)
-        } else if let url = viewModel.imageURL {
-            URLSession.shared.dataTask(with: url) { [ weak self ] data, response, error in
-                guard let data = data, error == nil else { return }
-                viewModel.imageData = data
-                DispatchQueue.main.async {
-                    self?.newsImageView.image = UIImage(data: data)
+            newsTitleLabel.text = viewModel.title
+            subtitleLabel.text = viewModel.subtitle
+            
+            DispatchQueue.global().async {
+                if let data = viewModel.imageData {
+                    let image = UIImage(data: data)
+                    DispatchQueue.main.async {
+                        self.newsImageView.image = image
+                    }
+                } else if let url = viewModel.imageURL {
+                    URLSession.shared.dataTask(with: url) { [ weak self ] data, response, error in
+                        guard
+                            let data = data,
+                            error == nil,
+                            let imageView = self?.newsImageView,
+                            let imageData = self?.resizedImageData(for: imageView, imageData: data) else {
+                            return
+                        }
+                        viewModel.imageData = imageData
+                        let image = UIImage(data: imageData)
+                        DispatchQueue.main.async {
+                            imageView.image = image
+                        }
+                    }.resume()
                 }
-            }.resume()
+            }
         }
+    
+    func resizedImageData(for imageView: UIImageView, imageData: Data) -> Data? {
+        guard let image = UIImage(data: imageData), image.size.width > 0 else {
+            return nil
+        }
+        var resizedImage: UIImage?
+        DispatchQueue.main.sync {
+            let ratio = imageView.bounds.size.width / image.size.width
+            let updatedSize = CGSize(
+                width: Int(image.size.width * ratio),
+                height: Int(image.size.height * ratio)
+            )
+            let size = updatedSize
+            let format = UIGraphicsImageRendererFormat(for: UITraitCollection(displayScale: 1))
+            resizedImage = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+                image.draw(in: CGRect(origin: .zero, size: size))
+            }
+        }
+        
+        return resizedImage?.jpegData(compressionQuality: 1)
     }
     
     func setupConstraints() {
