@@ -8,23 +8,6 @@
 import SnapKit
 import UIKit
 
-class NewsTableViewCellViewModel {
-    let title: String
-    let subtitle: String
-    let imageURL: URL?
-    var imageData: Data? = nil
-    
-    init(title: String,
-         subtitle: String,
-         imageURL: URL?
-    ) {
-        
-        self.title = title
-        self.subtitle = subtitle
-        self.imageURL = imageURL
-    }
-}
-
 class NewsTableViewCell: UITableViewCell {
     let newsImageView: UIImageView = {
         let image = UIImageView()
@@ -71,6 +54,32 @@ class NewsTableViewCell: UITableViewCell {
         addSubview(newsTitleLabel)
         addSubview(subtitleLabel)
     }
+        
+    func setupConstraints() {
+        
+        newsImageView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(4)
+            make.centerY.equalToSuperview()
+            make.height.equalTo(80)
+            make.width.equalTo(120)
+        }
+        
+        newsTitleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(newsImageView.snp.trailing).offset(20)
+            make.trailing.equalToSuperview().offset(-10)
+            make.top.equalToSuperview().offset(10)
+        }
+        
+        subtitleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(newsImageView.snp.trailing).offset(20)
+            make.trailing.equalToSuperview().offset(-10)
+            make.top.equalTo(newsTitleLabel.snp.bottom).offset(4)
+            make.bottom.equalToSuperview().offset(-10)
+        }
+    }
+}
+
+extension NewsTableViewCell {
     
     func configure(with viewModel: NewsTableViewCellViewModel) {
             newsTitleLabel.text = viewModel.title
@@ -118,30 +127,6 @@ class NewsTableViewCell: UITableViewCell {
                 image.draw(in: CGRect(origin: .zero, size: size))
             }
         }
-        
         return resizedImage?.jpegData(compressionQuality: 1)
-    }
-    
-    func setupConstraints() {
-        
-        newsImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(4)
-            make.centerY.equalToSuperview()
-            make.height.equalTo(80)
-            make.width.equalTo(120)
-        }
-        
-        newsTitleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(newsImageView.snp.trailing).offset(20)
-            make.trailing.equalToSuperview().offset(-10)
-            make.top.equalToSuperview().offset(10)
-        }
-        
-        subtitleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(newsImageView.snp.trailing).offset(20)
-            make.trailing.equalToSuperview().offset(-10)
-            make.top.equalTo(newsTitleLabel.snp.bottom).offset(4)
-            make.bottom.equalToSuperview().offset(-10)
-        }
     }
 }

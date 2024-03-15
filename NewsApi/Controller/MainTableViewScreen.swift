@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import SafariServices
 
-class ViewController: UIViewController {
+class MainTableViewScreen: UIViewController {
     
     private var tableView = UITableView()
     private var articles = [Article]()
@@ -18,13 +18,20 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(tableView)
-        tableView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(NewsTableViewCell.self, forCellReuseIdentifier: "cell")
-        
+        tableViewMakeConstrains()
+        apiCalled()
+    }
+    
+    func tableViewMakeConstrains() {
+        tableView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+    }
+    
+    func apiCalled() {
         ServiceApi.shared.getData() { [ weak self ] result in
             switch result {
             case.success(let articles):
@@ -44,7 +51,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UITableViewDataSource {
+extension MainTableViewScreen: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModels.count
     }
@@ -59,7 +66,7 @@ extension ViewController: UITableViewDataSource {
     
 }
 
-extension ViewController: UITableViewDelegate {
+extension MainTableViewScreen: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let article = articles[indexPath.row]
         
